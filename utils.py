@@ -1,6 +1,6 @@
-
-
-
+import itertools
+import random
+from typing import List, Tuple
 
 def zero_padding_multiplicatn(num_1: int, num_2: int, padding_size: int = 0, reverse: bool = False) -> str:
     """
@@ -21,3 +21,52 @@ def zero_padding_multiplicatn(num_1: int, num_2: int, padding_size: int = 0, rev
     answer = str(answer).reverse() if reverse else str(answer)
     answer = "0" * (padding_size - len(answer)) + answer if padding_size else answer
     return f"{num_1} * {num_2} = {answer}"
+
+def generate_validation_set(n: int, pairs_per_combination: int = 1) -> List[Tuple[int, int]]:
+    """
+    Args:
+        n (int): max digits
+        pairs_per_combination (int, optional): number of pairs per combination. Defaults to 1.
+
+    Returns:
+        (List[Tuple[int, int]]): list of pairs
+    """
+    pairs = set()
+    for digits1, digits2 in itertools.product(range(1, n+1), repeat=2):
+        while len(pairs) < pairs_per_combination * (digits1 + digits2 - 1):
+            num1 = random.randint(10**(digits1-1), 10**digits1 - 1)
+            num2 = random.randint(10**(digits2-1), 10**digits2 - 1)
+            pair = (num1, num2)
+            pair_reverse = (num2, num1)
+
+            pairs.update([pair, pair_reverse])
+    
+    return list(pairs)
+
+
+def generate_training_set(n: int, num_pairs: int, validation_pairs: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """
+    Args:
+        n (int): max digits
+        num_pairs (int): number of pairs
+        validation_pairs (List[Tuple[int, int]]): validation pairs
+
+    Returns:
+        (List[Tuple[int, int]]): list of pairs
+    """
+    pairs = []
+    while len(pairs) < num_pairs:
+        # Randomly determine the number of digits for each number
+        digits1 = random.randint(1, n)
+        digits2 = random.randint(1, n)
+        
+        # Generate each number
+        num1 = random.randint(10**(digits1-1), 10**digits1 - 1)
+        num2 = random.randint(10**(digits2-1), 10**digits2 - 1)
+
+        # Skip if the pair is in the validation set
+        if (num1, num2) in validation_pairs:
+            continue
+        pairs.append((num1, num2))
+    
+    return pairs
