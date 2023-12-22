@@ -35,7 +35,7 @@ def generate_validation_set(
         pairs_per_combination (int, optional): number of pairs per combination. Defaults to 1.
 
     Returns:
-        Set[Tuple[int, int]]: list of pairs
+        (Set[Tuple[int, int]]): list of pairs
     """
     pairs = set()
     for digits1, digits2 in itertools.product(range(1, n + 1), repeat=2):
@@ -51,18 +51,18 @@ def generate_validation_set(
 
 
 def generate_training_set(
-    n: int, num_pairs: int, validation_pairs: List[Tuple[int, int]]
-) -> Set[Tuple[int, int]]:
+    n: int, num_pairs: int, validation_pairs: Set[Tuple[int, int]]
+) -> List[Tuple[int, int]]:
     """
     Args:
         n (int): max digits
         num_pairs (int): number of pairs
-        validation_pairs (List[Tuple[int, int]]): validation pairs
+        validation_pairs (Set[Tuple[int, int]]): validation pairs
 
     Returns:
-        Set[Tuple[int, int]]: list of pairs
+        (Set[Tuple[int, int]]): list of pairs
     """
-    pairs = set()
+    pairs = list
     while len(pairs) < num_pairs:
         # Randomly determine the number of digits for each number
         digits1 = random.randint(1, n)
@@ -75,6 +75,6 @@ def generate_training_set(
         # Skip if the pair is in the validation set
         if (num1, num2) in validation_pairs:
             continue
-        pairs.update((num1, num2))
+        pairs.append((num1, num2))
 
     return pairs
