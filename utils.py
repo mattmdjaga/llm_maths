@@ -27,25 +27,30 @@ def zero_padding_multiplicatn(
 
 
 def generate_validation_set(
-    n: int, pairs_per_combination: int = 1
+    n: int, pairs_per_combination: List[int]
 ) -> Set[Tuple[int, int]]:
     """
     Args:
         n (int): max digits
-        pairs_per_combination (int, optional): number of pairs per combination. Defaults to 1.
+        pairs_per_combination (List[int]): number of pairs per combination.
 
     Returns:
         (Set[Tuple[int, int]]): list of pairs
     """
     pairs = set()
-    for digits1, digits2 in itertools.product(range(1, n + 1), repeat=2):
-        while len(pairs) < pairs_per_combination * (digits1 + digits2 - 1):
-            num1 = random.randint(10 ** (digits1 - 1), 10**digits1 - 1)
-            num2 = random.randint(10 ** (digits2 - 1), 10**digits2 - 1)
-            pair = (num1, num2)
-            pair_reverse = (num2, num1)
+    for digit1 in range(1, n + 1):
+        limit = pairs_per_combination[digit1 - 1]
+        limit_per_pair = limit // n
+        for digit2 in range(1, n + 1):
+            cur_pairs = set()
+            while len(cur_pairs) < limit_per_pair:
+                num1 = random.randint(10 ** (digit1 - 1), 10**digit1 - 1)
+                num2 = random.randint(10 ** (digit2 - 1), 10**digit2 - 1)
+                pair = (num1, num2)
+                #pair_reverse = (num2, num1)
 
-            pairs.update([pair, pair_reverse])
+                cur_pairs.add(pair)
+            pairs.update(cur_pairs)
 
     return pairs
 
