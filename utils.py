@@ -1,6 +1,7 @@
-import itertools
 import random
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Union
+
+from torch.utils.data import Dataset
 
 
 def zero_padding_multiplicatn(
@@ -47,7 +48,7 @@ def generate_validation_set(
                 num1 = random.randint(10 ** (digit1 - 1), 10**digit1 - 1)
                 num2 = random.randint(10 ** (digit2 - 1), 10**digit2 - 1)
                 pair = (num1, num2)
-                #pair_reverse = (num2, num1)
+                # pair_reverse = (num2, num1)
 
                 cur_pairs.add(pair)
             pairs.update(cur_pairs)
@@ -65,9 +66,9 @@ def generate_training_set(
         validation_pairs (Set[Tuple[int, int]]): validation pairs
 
     Returns:
-        (Set[Tuple[int, int]]): list of pairs
+        (List[Tuple[int, int]]): list of pairs
     """
-    pairs = list
+    pairs = []
     while len(pairs) < num_pairs:
         # Randomly determine the number of digits for each number
         digits1 = random.randint(1, n)
@@ -83,3 +84,29 @@ def generate_training_set(
         pairs.append((num1, num2))
 
     return pairs
+
+
+class MathsDataset(Dataset):
+    """
+    Dataset for the multiplication task
+    """
+
+    def __init__(
+        self,
+        max_int: int,
+        train: bool = True,
+        num_train_samples: int = None,
+        val_samples: Union[List, Set] = None,
+    ):
+        if train:
+            self.samples = generate_training_set(
+                max_int, num_train_samples, val_samples
+            )
+        else:
+            self.samples = list(generate_validation_set(max_int, val_samples))
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, idx: int) -> str:
+        return self.samples[idx]
