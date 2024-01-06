@@ -90,13 +90,12 @@ class MathsDataset(Dataset):
     """
     Dataset for the multiplication task
     """
-
     def __init__(
         self,
         max_int: int,
         train: bool = True,
         num_train_samples: int = None,
-        val_samples: Union[List, Set] = None,
+        val_samples: List = None,
     ):
         if train:
             self.samples = generate_training_set(
