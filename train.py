@@ -16,8 +16,30 @@ def validation():
     pass
 
 
-def train():
-    pass
+def train(args):
+    accelerator = Accelerator(log_with="wandb", project_dir=args.save_path)
+
+    # Get configs that will be repeatedly used
+    model_name = args.model_name
+    batch_size = args.batch_size
+    max_digits = args.max_digits
+    save_path = args.save_path
+
+    # Set random seed
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+
+    # Load tokenizer and model
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    # init tracking
+    accelerator.init_trackers(
+        project_name="llm_maths",
+        config=args,
+        #init_kwargs={"wandb": {"entity": "my-wandb-team"}},
+    )
 
 
 def main():
@@ -50,13 +72,15 @@ def main():
         "--seed", type=int, default=42, help="Random seed for reproducibility"
     )
     parser.add_argument(
-        "--save_path", type=str, default="./model", help="Path to save the model"
+        "--save_path", type=str, default="/testing", help="Path to save the results"
     )
     parser.add_argument(
         "--save_every", type=int, default=1000, help="Save the model every n steps"
     )
     parser.add_argument("--log_every", type=int, default=100, help="Log every n steps")
     args = parser.parse_args()
+
+    train(args)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple, Set, Union
+from typing import List, Tuple, Set
 
 from torch.utils.data import Dataset
 
