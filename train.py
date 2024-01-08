@@ -2,7 +2,6 @@ import random
 import argparse
 from typing import List, Tuple, Dict, Union
 
-from utils import zero_padding_multiplicatn, MathsDataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from torch import nn
@@ -11,6 +10,7 @@ from torch.utils.data import DataLoader
 from accelerate import Accelerator
 from tqdm import tqdm
 
+from utils import zero_padding_multiplicatn, MathsDataset
 
 def validation():
     pass
@@ -38,8 +38,20 @@ def train(args):
     accelerator.init_trackers(
         project_name="llm_maths",
         config=args,
-        #init_kwargs={"wandb": {"entity": "my-wandb-team"}},
+        # init_kwargs={"wandb": {"entity": "my-wandb-team"}},
     )
+
+    # Generate validation set
+    validation_pairs_per_combination = [
+        int(x) for x in args.validation_pairs_per_combination.split(",")
+    ]
+    validation_data = MathsDataset(
+        max_int=max_digits, train=False, val_samples=validation_pairs_per_combination
+    )
+    train_data = MathsDataset(
+        max_int=max_digits, train=True, val_samples=validation_data, num_train_samples=args.num_pairs
+    )
+
 
 
 def main():
@@ -51,6 +63,15 @@ def main():
         type=int,
         default=5,
         help="The number of maximum digits used for multiplication",
+    )
+    parser.add_argument(
+        "--padding_size",
+        type=int,
+        default=0,
+        help="How long should each number be padded to",
+    )
+    parser.add_argument(
+        "--reverse", type=bool, default=False, help="Reverse the answer"
     )
     parser.add_argument(
         "--num_pairs",

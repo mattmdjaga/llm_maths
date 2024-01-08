@@ -24,19 +24,19 @@ def zero_padding_multiplicatn(
     num_2 = "0" * (padding_size - len(num_2)) + num_2 if padding_size else num_2
     answer = str(answer)[::-1] if reverse else str(answer)
     answer = "0" * (padding_size - len(answer)) + answer if padding_size else answer
-    return f"{num_1} * {num_2} = {answer}"
+    return f"{num_1}*{num_2}={answer}"
 
 
 def generate_validation_set(
     n: int, pairs_per_combination: List[int]
-) -> Set[Tuple[int, int]]:
+) -> List[Tuple[int, int]]:
     """
     Args:
         n (int): max digits
         pairs_per_combination (List[int]): number of pairs per combination.
 
     Returns:
-        (Set[Tuple[int, int]]): list of pairs
+        (List[Tuple[int, int]]): list of pairs
     """
     pairs = set()
     for digit1 in range(1, n + 1):
@@ -53,7 +53,7 @@ def generate_validation_set(
                 cur_pairs.add(pair)
             pairs.update(cur_pairs)
 
-    return pairs
+    return list(pairs)
 
 
 def generate_training_set(
@@ -96,16 +96,27 @@ class MathsDataset(Dataset):
         train: bool = True,
         num_train_samples: int = None,
         val_samples: List = None,
+        padding_size: int = 0,
+        reverse: bool = False
     ):
         if train:
             self.samples = generate_training_set(
                 max_int, num_train_samples, val_samples
             )
         else:
-            self.samples = list(generate_validation_set(max_int, val_samples))
+            self.samples = generate_validation_set(max_int, val_samples)
+        self.padding_size = padding_size
+        self.reverse = reverse
 
     def __len__(self) -> int:
         return len(self.samples)
 
     def __getitem__(self, idx: int) -> str:
-        return self.samples[idx]
+        num_1, num_2 = self.samples[idx]
+        transformed = zero_padding_multiplicatn(
+            num_1, num_2, padding_size=self.padding_size, reverse=self.reverse
+        )
+        x, y = transformed.split("=")
+        x += "="
+        return x, y
+
